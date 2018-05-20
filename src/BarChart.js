@@ -41,7 +41,6 @@ class BarChart extends Component {
       .remove()
    
     const {width, data} = this.props;
-    console.log(width, data);
     const barWidth = width / data.length;
     // Style the bars
     select(node)
