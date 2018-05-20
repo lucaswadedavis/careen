@@ -5,6 +5,7 @@ Careen is my boilerplate and notes for spinning up a new project quickly.
 ## Tools
  
  - React
+  - React Resize Detector for responsive charts
   - React Router & HashRouter for gh-pages hosted SPAs
     - React Router Bootstrap for the LinkContainer component
   - React Burger Menu

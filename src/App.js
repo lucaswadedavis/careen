@@ -3,6 +3,7 @@ import { HashRouter as Router, Route, Link } from "react-router-dom";
 import { Grid, Nav, NavItem, Navbar, Row } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import BarChart from './BarChart';
+import ReactResizeDetector from 'react-resize-detector';
 
 import './App.css';
 
@@ -36,13 +37,54 @@ const Home = () => (
   </Grid>
 );
 
-const About = () => (
-  <Grid>
-    <h2>About</h2>
-    <BarChart data={[50,100,10,3]} size={[500,200]} />
-    <p>Created with d3</p>
-  </Grid>
-);
+class About extends Component {
+   state = {
+    width: null,
+    height: null,
+  }
+
+  saveRef = (ref) => this.containerNode = ref
+
+  measure() {
+    const {clientWidth, clientHeight} = this.containerNode
+    console.log(this.containerNode);
+
+    this.setState({
+      width: clientWidth,
+      height: clientHeight,
+    })
+  }
+
+  componentDidMount() {
+    this.measure()
+  }
+
+  componentDidUpdate() {
+    this.measure()
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      this.state.width !== nextState.width ||
+      this.state.height !== nextState.height
+    )
+  } 
+  render () {
+    const { height, width } = this.state;
+    console.log(height, width);
+    return (
+      <div ref={this.saveRef} className="chart-container">
+        <ReactResizeDetector handleWidth onResize={() => this.measure()} />
+        <Grid>
+          <h2>About</h2>
+          <p>Created with d3</p>
+        </Grid>
+        <BarChart data={[50,100,50,30]} width={width} height={200} />
+      </div>
+    )
+  }
+
+}
 
 const Topics = ({ match }) => (
   <Grid>
