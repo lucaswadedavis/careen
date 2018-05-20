@@ -6,6 +6,8 @@ Careen is my boilerplate and notes for spinning up a new project quickly.
 
  - React
  - gh-pages for hosting
+ - React Router & HashRouter for gh-pages hosted SPAs
+ - React Burger Menu
  - Firebase Functions
  - Firebase Datastore
  - Firebase Hosting if appropriate
