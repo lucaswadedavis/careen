@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { HashRouter as Router, Route, Link } from "react-router-dom";
-import { slide as Menu } from 'react-burger-menu';
-import { Grid, Nav, NavItem, Navbar, PageHeader, Row } from 'react-bootstrap';
+import { Grid, Nav, NavItem, Navbar, Row } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
+import BarChart from './BarChart';
 
 import './App.css';
 
@@ -15,9 +16,9 @@ class App extends Component {
             <Navbar.Brand>Careen</Navbar.Brand>
           </Navbar.Header>
           <Nav>
-            <NavItem><Link to="/">Home</Link></NavItem>
-            <NavItem><Link to="/about">About</Link></NavItem>
-            <NavItem><Link to="/topics">Topics</Link></NavItem>
+            <LinkContainer to="/"><NavItem>Home</NavItem></LinkContainer>
+            <LinkContainer to="/about"><NavItem>About</NavItem></LinkContainer>
+            <LinkContainer to="/topics"><NavItem>Topics</NavItem></LinkContainer>
           </Nav>
         </Navbar>
           <Route exact path="/" component={Home} />
@@ -37,7 +38,9 @@ const Home = () => (
 
 const About = () => (
   <Grid>
-  <h2>About</h2>
+    <h2>About</h2>
+    <BarChart data={[50,100,10,3]} size={[500,200]} />
+    <p>Created with d3</p>
   </Grid>
 );
 
