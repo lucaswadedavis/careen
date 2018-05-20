@@ -84,5 +84,9 @@
 }
 
 #page-wrap {
-  margin: 16px 0 0 120px;
+  margin: 0px 0 0 104px;
+  padding-left: 24px;
+  padding-top: 20px;
+  min-height: 100%;
+  border-left: 2px solid black;
 }
