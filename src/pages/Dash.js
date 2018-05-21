@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Grid } from 'react-bootstrap';
-import BarChart from '../BarChart';
 import PlanetGraph from '../PlanetGraph';
 import ReactResizeDetector from 'react-resize-detector';
 

@@ -8,18 +8,22 @@ import { select } from 'd3-selection'
 class PlanetGraph extends Component {
   constructor(props){
     super(props)
-    this.createBarChart = this.createBarChart.bind(this)
+    this.createGraph = this.createGraph.bind(this)
+  }
+
+  onHover() {
+
   }
 
   componentDidMount() {
-    this.createBarChart()
+    this.createGraph()
   }
 
   componentDidUpdate() {
-    this.createBarChart()
+    this.createGraph()
   }
 
-  createBarChart() {
+  createGraph() {
     const node = this.node
     const dataMax = max(this.props.data)
     const yScale = scaleLinear()
