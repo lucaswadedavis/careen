@@ -6,6 +6,7 @@ import About from './pages/About';
 import Home from './pages/Home';
 import Dash from './pages/Dash';
 import Topics from './pages/Topics';
+import Affordances from './pages/Affordances';
 import FormElements from './pages/FormElements';
 
 import './App.css';
@@ -24,6 +25,7 @@ class App extends Component {
             <LinkContainer to="/about"><NavItem>About</NavItem></LinkContainer>
             <LinkContainer to="/dash"><NavItem>Dash</NavItem></LinkContainer>
             <LinkContainer to="/form-elements"><NavItem>Form Elements</NavItem></LinkContainer>
+            <LinkContainer to="/affordances"><NavItem>Affordances</NavItem></LinkContainer>
             <LinkContainer to="/topics"><NavItem>Topics</NavItem></LinkContainer>
           </Nav>
           <Nav pullRight>
@@ -33,6 +35,7 @@ class App extends Component {
           <Route exact path="/" component={Home} />
           <Route path="/about" component={About} />
           <Route path="/dash" component={Dash} />
+          <Route path="/affordances" component={Affordances} />
           <Route path="/form-elements" component={FormElements} />
           <Route path="/topics" component={Topics} />
       </div>
