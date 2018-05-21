@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip, Popover, ButtonToolbar, OverlayTrigger, Button, Grid } from 'react-bootstrap';
+import { Badge, Tooltip, Popover, ButtonToolbar, OverlayTrigger, Button, Grid } from 'react-bootstrap';
 
 import '../App.css';
 
@@ -39,7 +39,7 @@ const positionerInstance = (
 
 const Affordances = () => (
   <Grid>
-    <h2>Affordances</h2>
+    <h2>Affordances<Badge>3</Badge></h2>
     { positionerInstance }
   </Grid>
 );

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Grid } from 'react-bootstrap';
 import PlanetGraph from '../PlanetGraph';
+import BarChart from '../BarChart';
 import ReactResizeDetector from 'react-resize-detector';
 
 import '../App.css';
@@ -36,6 +37,7 @@ class Dash extends Component {
       this.state.height !== nextState.height
     )
   } 
+
   render () {
     const { width } = this.state;
     return (
@@ -46,6 +48,7 @@ class Dash extends Component {
         </Grid>
         <div ref={this.saveRef} className="chart-container">
           <ReactResizeDetector handleWidth onResize={() => this.measure()} />
+          <BarChart data={[50,100,50,30]} width={width} height={200} />
           <PlanetGraph data={[5,50,100,50,30]} width={width} height={200} />
         </div>
       </div>

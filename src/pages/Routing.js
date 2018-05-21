@@ -4,9 +4,9 @@ import { Grid, Row } from 'react-bootstrap';
 
 import '../App.css';
 
-const Topics = ({ match }) => (
+const Routing = ({ match }) => (
   <Grid>
-    <h2>Topics</h2>
+    <h2>Routing</h2>
     <ul>
     <li>
     <Link to={`${match.url}/rendering`}>Rendering with React</Link>
@@ -35,4 +35,4 @@ const Topic = ({ match }) => (
 );
 
 
-export default Topics;
+export default Routing;
