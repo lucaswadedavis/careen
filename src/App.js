@@ -4,6 +4,7 @@ import { Glyphicon, Nav, NavItem, Navbar } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 import Home from './pages/Home';
 import Dash from './pages/Dash';
+import Bells from './pages/Bells';
 import Routing from './pages/Routing';
 import Affordances from './pages/Affordances';
 import FormElements from './pages/FormElements';
@@ -32,6 +33,7 @@ class App extends Component {
         </Navbar>
           <Route exact path="/" component={Home} />
           <Route path="/dash" component={Dash} />
+          <Route path="/bells" component={Bells} />
           <Route path="/affordances" component={Affordances} />
           <Route path="/form-elements" component={FormElements} />
           <Route path="/routing" component={Routing} />

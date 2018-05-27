@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "d3": "^5.4.0",
+    "gaussian": "^1.1.0",
     "gh-pages": "^1.1.0",
     "rc-slider": "^8.6.1",
     "react": "^16.3.2",
@@ -13,7 +14,8 @@
     "react-resize-detector": "^2.3.0",
     "react-router-bootstrap": "^0.24.4",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.4"
+    "react-scripts": "1.1.4",
+    "recharts": "^1.0.0-beta.10"
   },
   "homepage": "https://lucaswadedavis.github.io/careen",
   "scripts": {
