@@ -5,6 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import Home from './pages/Home';
 import Dash from './pages/Dash';
 import Bells from './pages/Bells';
+import Luck from './pages/Luck';
 import Routing from './pages/Routing';
 import Affordances from './pages/Affordances';
 import FormElements from './pages/FormElements';
@@ -16,10 +17,12 @@ class App extends Component {
     return (
       <Router>
       <div>
-        <Navbar inverse>
+        <Navbar inverse collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>Careen</Navbar.Brand>
+            <Navbar.Toggle />
           </Navbar.Header>
+          <Navbar.Collapse>
           <Nav>
             <LinkContainer to="/"><NavItem>Home</NavItem></LinkContainer>
             <LinkContainer to="/dash"><NavItem>Dash</NavItem></LinkContainer>
@@ -30,10 +33,12 @@ class App extends Component {
           <Nav pullRight>
             <NavItem><Glyphicon glyph="star" /></NavItem>
           </Nav>
+        </Navbar.Collapse>
         </Navbar>
           <Route exact path="/" component={Home} />
           <Route path="/dash" component={Dash} />
           <Route path="/bells" component={Bells} />
+          <Route path="/luck" component={Luck} />
           <Route path="/affordances" component={Affordances} />
           <Route path="/form-elements" component={FormElements} />
           <Route path="/routing" component={Routing} />
