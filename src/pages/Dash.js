@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Grid } from 'react-bootstrap';
-import Slider, { Range } from 'rc-slider';
+import Slider from 'rc-slider';
 import PlanetGraph from '../PlanetGraph';
 import BarChart from '../BarChart';
 import ReactResizeDetector from 'react-resize-detector';
