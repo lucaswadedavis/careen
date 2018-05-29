@@ -89,3 +89,15 @@
 .chart-container {
   margin: 28px;
 }
+
+.Agent-Container {
+  text-align: center;
+}
+
+.Agent-Cell {
+  display: inline-block;
+  margin: 0 4px 0 4px;
+  width: 12px;
+  height: 12px;
+  background-color: #8884d8;
+}

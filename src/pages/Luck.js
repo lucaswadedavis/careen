@@ -1,22 +1,27 @@
 import React, { Component } from 'react';
-import { Grid } from 'react-bootstrap';
 import Slider from 'rc-slider';
-import {Area, AreaChart, Cell, PieChart, Pie, YAxis, CartesianGrid, Tooltip, Legend} from  'recharts';
+import Chance from 'chance';
+import { Tooltip as RbTooltip, OverlayTrigger, Grid } from 'react-bootstrap';
+import {Area, AreaChart, BarChart, Bar, Cell, PieChart, Pie, YAxis, CartesianGrid, Tooltip } from  'recharts';
 import ReactResizeDetector from 'react-resize-detector';
-import gaussian from 'gaussian';
 import '../App.css';
 
-// Notes
-// text explaination
-// sum vs product
-// maybe a toggle
-// central limit theorem
-// random variables
-// lots of agents
-// scatterplot
-// 
-//
-//
+const chance = new Chance('lukedavis');
+
+// TODO:
+//  - make the Gaussian a real gaussian generator
+//  - make the trait graphs smaller and area charts
+//  - figure out how to set vertical lines at some value on the charts
+//  - add a mouseover listener to the agent squares that links the graphs
+//  - add a pie graph that shows percentage scores by decile
+//  - change the y axis of the big graph to a percentage
+
+const tooltip = (agent) => {
+  return <RbTooltip id={agent.name}>
+    { agent.name }
+  </RbTooltip>
+}
+
 function Gaussian(n=100, m=10) {
   let res = []; 
   for (let i = 0; i < n; i++) {
@@ -30,61 +35,60 @@ function Gaussian(n=100, m=10) {
   return res;
 };
 
-
-const skills = []; 
-
-for (let i = 0; i < 10; i++) {
-  skills.push(Gaussian(100, 4));
-}
-
-let output = ''; 
-let product = []; 
-
-for (let i = 0; i < skills[0].length; i++) {
-  let prod = 1;
-  for (let j = 0; j < skills.length; j++) {
-    prod *= skills[j][i];
- }
-  product.push(prod);
-}
-
-product.sort((a, b) => a - b); 
-
-for (let i = 0; i < product.length; i++) {
-  output += '\n' + product[i];
-}
-
-console.log(output);
-
-
-const toPercent = (decimal, fixed = 0) => {
-	return `${(decimal * 100).toFixed(fixed)}%`;
-};
-
-const distribution = (mean, variance) => {
-  const steps = 100;
-  const res = [];
-  const d = gaussian(mean, variance);
-  const increment = 0.02 * mean;
-  for (let i = 0; i < steps; i++) {
-    res.push(d.pdf(increment + (i * increment)));
+class Agent {
+  constructor () {
+    this.skills = [];
+    this.name = chance.name();
+    this.score = 0;
+    this.size = 0;
   }
-  return res;
 }
 
-class Dash extends Component {
+class Page extends Component {
    state = {
     width: null,
-    variance1: 200,
-    variance2: 250,
-    data1: distribution(100, 200),
-    data2: distribution(100, 250),
+    agents: [],
+    product: [],
+    skills: [],
+    numberOfAgents: 100,
+    numberOfTraits: 5,
+  }
+
+  constructor(props) {
+    super(props);
+    const { agents, skills, product } = this.generatePopulation();
+    this.state.skills = skills;
+    this.state.agents = agents;
+    this.state.product = product;
+  }
+
+  generatePopulation(numberOfAgents=this.state.numberOfAgents, numberOfTraits=this.state.numberOfTraits) {
+    //const { numberOfAgents, numberOfTraits } = this.state;
+    const skills = []; 
+    const agents = [];
+    let product = []; 
+    for (let i = 0; i < numberOfTraits; i++) {
+      skills.push(Gaussian(numberOfAgents, 4));
+    }
+    for (let i = 0; i < skills[0].length; i++) {
+      let prod = 1;
+      let agent = new Agent();
+      for (let j = 0; j < skills.length; j++) {
+        prod *= skills[j][i];
+        agent.skills.push(skills[j][i]);
+     }
+      agent.score = prod;
+      agent.size = prod;
+      agents.push(agent);
+      product.push(prod);
+    }
+    product.sort((a, b) => a - b); 
+    return {agents, skills, product}
   }
 
   saveRef = (ref) => this.containerNode = ref
 
   getSum = (data) => {
-    console.log(data);
     return data.reduce((acc, d) => {
       return acc + d;
     }, 0);
@@ -96,9 +100,6 @@ class Dash extends Component {
       return {name: x.name, value: c * x.value};
     });
     if (!d[0]) return;
-
-    //console.log((c * d[0].value) / (c * d[1].value));
-    //console.log(d[0].value, d[1].value);
     const a = Math.max(c * d[0].value, c * d[1].value);
     const b = Math.min(c * d[0].value, c * d[1].value);
     const COLORS = ["#8884d8", "#82ca9d"];
@@ -121,13 +122,11 @@ class Dash extends Component {
     const { width } = this.state;
     const {clientWidth} = this.containerNode
     if (width === clientWidth) return; 
-
-    this.setState({
-      width: clientWidth,
-    })
+    this.setState({width: clientWidth})
   }
 
   componentDidMount() {
+
     this.measure()
   }
 
@@ -135,26 +134,74 @@ class Dash extends Component {
     this.measure()
   }
 
-  updateVariance1(variance1) {
-    const data1 = distribution(100, variance1);
-    this.setState({data1, variance1});
+  updateNumberOfAgents(numberOfAgents) {
+    const { numberOfTraits } = this.state;
+    const { agents, skills, product } = this.generatePopulation(numberOfAgents, numberOfTraits);
+    this.setState({numberOfAgents, agents, skills, product});
   }
 
-  updateVariance2(variance2) {
-    const data2 = distribution(100, variance2);
-    this.setState({data2, variance2});
+  updateNumberOfTraits(numberOfTraits) {
+    const { numberOfAgents } = this.state;
+    const { agents, skills, product } = this.generatePopulation(numberOfAgents, numberOfTraits);
+    this.setState({numberOfTraits, agents, skills, product});
+  }
+
+  renderAgentsContainer() {
+    const { agents } = this.state;
+    return (
+      <div className="Agents-Container">
+        <h3>Agents</h3>
+        { 
+          agents.map((agent, i) => {
+            return (
+              <OverlayTrigger key={i} placement="top" overlay={tooltip(agent)}>
+                <span className="Agent-Cell"></span>
+              </OverlayTrigger>
+            );
+          })
+        }
+      </div>
+    );
   }
 
 
-  render () {
-    const { data1, data2, width, variance1, variance2 } = this.state;
-    const cData = data1.map((datum, i) => {
-      return {a: data1[i], b: data2[i]}
-    });
+  renderTraitChart(width, data, index) {
+    return (
+        <BarChart key={index} width={width} height={100} data={data}
+              margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+         <CartesianGrid strokeDasharray="3 3"/>
+         <Tooltip />
+         <Bar dataKey="a" stackId="a" fill="#8884d8" />
+        </BarChart>
+    )
 
-    const pData = product.map(datum => {
-      return {a: datum};
-    });
+  }
+
+  render() {
+    const { width, skills, product, numberOfAgents, numberOfTraits } = this.state;
+    let bData = [];
+    let pData = [];
+    let traits = [];
+
+    if (skills[0] !== undefined) {
+
+      for (let i = 0; i < skills.length; i++) {
+        const max = Math.max(...skills[i]);
+        const numberOfBuckets = 9;
+        bData = skills[i].reduce((acc, datum) => {
+          const i = Math.round(numberOfBuckets * datum / max);
+          acc[i]++
+          return acc;
+        }, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).map(datum => {
+          return {a: datum};
+        });
+        traits.push(bData);
+      }
+
+      pData = product.map(datum => {
+        return {a: datum};
+      });
+    }
 
     return (
       <div>
@@ -163,10 +210,12 @@ class Dash extends Component {
           <p>Created with d3</p>
           <div ref={this.saveRef}>
             <ReactResizeDetector handleWidth refreshMode="throttle" refreshRate={3000} onResize={() => this.measure()} />
-            <h3>variance of a</h3>
-            <Slider min={1} max={450} value={variance1} onChange={val => this.updateVariance1(val)} />
-            <h3>variance of b</h3>
-            <Slider min={1} max={450} value={variance2} onChange={val => this.updateVariance2(val)} />
+            <h3>number of agents ({ numberOfAgents })</h3>
+            <Slider min={10} max={200} value={numberOfAgents} onChange={val => this.updateNumberOfAgents(val)} />
+            <h3>number of traits ({ numberOfTraits })</h3>
+            <Slider min={1} max={10} value={numberOfTraits} onChange={val => this.updateNumberOfTraits(val)} />
+
+            { this.renderAgentsContainer() } 
 
             <AreaChart width={width} height={300} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
@@ -175,23 +224,7 @@ class Dash extends Component {
              <Area dataKey="a" fill="#8884d8" />
             </AreaChart>
 
-
-
-            <AreaChart width={width} height={300} data={cData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
-             <CartesianGrid strokeDasharray="3 3"/>
-             <YAxis/>
-             <Tooltip content={ this.renderCustomTooltip } />
-             <Legend />
-             <Area dataKey="a" fill="#8884d8" />
-             <Area dataKey="b" fill="#82ca9d" />
-            </AreaChart>
-            <AreaChart stackOffset="expand" width={width} height={100} data={cData}
-              margin={{top: 20, right: 30, left: 20, bottom: 5}}>
-             <CartesianGrid strokeDasharray="3 3"/>
-            <YAxis tickFormatter={toPercent}/>
-             <Area dataKey="a" fill="#8884d8" stackId="1" />
-             <Area dataKey="b" fill="#82ca9d" stackId="1" />
-            </AreaChart>
+            { traits.map((trait, i) => this.renderTraitChart(width, trait, i)) }            
           </div>
         </Grid>
       </div>
@@ -200,4 +233,4 @@ class Dash extends Component {
 
 }
 
-export default Dash;
+export default Page;
