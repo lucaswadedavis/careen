@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import Slider from 'rc-slider';
 import Chance from 'chance';
+import gaussian from 'gaussian';
 import { Tooltip as RbTooltip, OverlayTrigger, Grid } from 'react-bootstrap';
-import {Area, AreaChart, BarChart, Bar, Cell, PieChart, Pie, YAxis, CartesianGrid, Tooltip } from  'recharts';
+import {Area, AreaChart, Cell, PieChart, Pie, YAxis, CartesianGrid, ReferenceLine, Tooltip } from  'recharts';
 import ReactResizeDetector from 'react-resize-detector';
 import '../App.css';
 
 const chance = new Chance('lukedavis');
 
 // TODO:
-//  - make the Gaussian a real gaussian generator
-//  - make the trait graphs smaller and area charts
 //  - figure out how to set vertical lines at some value on the charts
 //  - add a mouseover listener to the agent squares that links the graphs
 //  - add a pie graph that shows percentage scores by decile
@@ -21,19 +20,6 @@ const tooltip = (agent) => {
     { agent.name }
   </RbTooltip>
 }
-
-function Gaussian(n=100, m=10) {
-  let res = []; 
-  for (let i = 0; i < n; i++) {
-    let sum = 0;
-    for (let j = 0; j < m; j++) {
-      sum += Math.random() * 10 | 0;
-    }   
-    let avg = sum / m;
-    res.push(avg);
-  }
-  return res;
-};
 
 class Agent {
   constructor () {
@@ -63,24 +49,44 @@ class Page extends Component {
   }
 
   generatePopulation(numberOfAgents=this.state.numberOfAgents, numberOfTraits=this.state.numberOfTraits) {
-    //const { numberOfAgents, numberOfTraits } = this.state;
+    const mean = 100;
+    const variance = 250;
     const skills = []; 
     const agents = [];
     let product = []; 
+    // repace this with the trick from bells
+    const d = gaussian(mean, variance);
+    // get a random element from that distribution
+    // const sample = distribution.pdf(Math.random());
+    const steps = 100;
+    const increment = 0.02 * mean;
+    let skill;
+    let datum;
     for (let i = 0; i < numberOfTraits; i++) {
-      skills.push(Gaussian(numberOfAgents, 4));
+      skill = [];
+      for (let j = 0; j < steps; j++) {
+        datum = d.pdf(increment + (j * increment));
+        skill.push(datum);
+      }
+      skills.push(skill);
     }
-    for (let i = 0; i < skills[0].length; i++) {
+
+    // this assigns trait values to agents
+    // and figures out the product
+    for (let i = 0; i < numberOfAgents; i++) {
       let prod = 1;
+      let trait = null;
       let agent = new Agent();
-      for (let j = 0; j < skills.length; j++) {
-        prod *= skills[j][i];
-        agent.skills.push(skills[j][i]);
-     }
+      for (let j = 0; j < numberOfTraits; j++) {
+        trait = d.ppf(Math.random());
+        agent.skills.push(trait);
+        prod *= trait;
+      }
       agent.score = prod;
       agent.size = prod;
       agents.push(agent);
       product.push(prod);
+      if (i > 500) debugger;
     }
     product.sort((a, b) => a - b); 
     return {agents, skills, product}
@@ -166,41 +172,33 @@ class Page extends Component {
 
 
   renderTraitChart(width, data, index) {
+    console.log(data);
     return (
-        <BarChart key={index} width={width} height={100} data={data}
+      <div className="Trait-Chart-Container" key={index} >
+        <AreaChart width={width} height={100} data={data}
               margin={{top: 20, right: 30, left: 20, bottom: 5}}>
-         <CartesianGrid strokeDasharray="3 3"/>
-         <Tooltip />
-         <Bar dataKey="a" stackId="a" fill="#8884d8" />
-        </BarChart>
+         <Area dataKey="a" stackId="a" fill="#8884d8" />
+        <ReferenceLine x={100} stroke="red" />
+        </AreaChart>
+      </div>
     )
-
   }
 
   render() {
     const { width, skills, product, numberOfAgents, numberOfTraits } = this.state;
-    let bData = [];
     let pData = [];
-    let traits = [];
-
+    const traits = [];
     if (skills[0] !== undefined) {
-
-      for (let i = 0; i < skills.length; i++) {
-        const max = Math.max(...skills[i]);
-        const numberOfBuckets = 9;
-        bData = skills[i].reduce((acc, datum) => {
-          const i = Math.round(numberOfBuckets * datum / max);
-          acc[i]++
-          return acc;
-        }, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).map(datum => {
-          return {a: datum};
-        });
-        traits.push(bData);
-      }
-
       pData = product.map(datum => {
         return {a: datum};
       });
+    
+      for (let i = 0; i < skills.length; i++) {
+        traits.push(skills[i].map(n => {
+          return {a: n};
+        }));
+      }
+
     }
 
     return (
@@ -219,12 +217,12 @@ class Page extends Component {
 
             <AreaChart width={width} height={300} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
-             <YAxis/>
+             <ReferenceLine x={50} stroke="red" />
              <Tooltip />
              <Area dataKey="a" fill="#8884d8" />
             </AreaChart>
 
-            { traits.map((trait, i) => this.renderTraitChart(width, trait, i)) }            
+            { traits.map((trait, i) => this.renderTraitChart(width / numberOfTraits, trait, i)) }            
           </div>
         </Grid>
       </div>
