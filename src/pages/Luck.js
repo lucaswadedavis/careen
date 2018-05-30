@@ -14,6 +14,7 @@ const chance = new Chance('lukedavis');
 //  - add a mouseover listener to the agent squares that links the graphs
 //  - add a pie graph that shows percentage scores by decile
 //  - change the y axis of the big graph to a percentage
+//  - because there's a mismatch between the pdf and ppf sampling use a map
 
 const tooltip = (agent) => {
   return <RbTooltip id={agent.name}>
