@@ -10,11 +10,7 @@ import '../App.css';
 const chance = new Chance('lukedavis');
 
 // TODO:
-//  - figure out how to set vertical lines at some value on the charts
-//  - add a mouseover listener to the agent squares that links the graphs
 //  - add a pie graph that shows percentage scores by decile
-//  - change the y axis of the big graph to a percentage
-//  - because there's a mismatch between the pdf and ppf sampling use a map
 
 const tooltip = (agent) => {
   return <RbTooltip id={agent.name}>
@@ -35,11 +31,14 @@ class Page extends Component {
    state = {
     width: null,
     agents: [],
+    activeAgent: null,
     product: [],
     skills: [],
     numberOfAgents: 100,
     numberOfTraits: 5,
   }
+
+  skillKey = {};
 
   constructor(props) {
     super(props);
@@ -67,6 +66,7 @@ class Page extends Component {
       skill = [];
       for (let j = 0; j < steps; j++) {
         datum = d.pdf(increment + (j * increment));
+        this.skillKey[increment + (j * increment)] = j;
         skill.push(datum);
       }
       skills.push(skill);
@@ -74,12 +74,16 @@ class Page extends Component {
 
     // this assigns trait values to agents
     // and figures out the product
+    let sample;
     for (let i = 0; i < numberOfAgents; i++) {
       let prod = 1;
       let trait = null;
       let agent = new Agent();
       for (let j = 0; j < numberOfTraits; j++) {
-        trait = d.ppf(Math.random());
+        sample = Math.random();
+        trait = d.ppf(sample);
+        // here 
+        //this.skillKey[trait] = d.pdf(trait);
         agent.skills.push(trait);
         prod *= trait;
       }
@@ -161,7 +165,7 @@ class Page extends Component {
         { 
           agents.map((agent, i) => {
             return (
-              <OverlayTrigger key={i} placement="top" overlay={tooltip(agent)}>
+              <OverlayTrigger key={i} placement="top" onMouseOver={() => this.setState({activeAgent: agent})} overlay={tooltip(agent)}>
                 <span className="Agent-Cell"></span>
               </OverlayTrigger>
             );
@@ -173,21 +177,42 @@ class Page extends Component {
 
 
   renderTraitChart(width, data, index) {
-    console.log(data);
+    const { activeAgent } = this.state;
+    let refLine = null;
+    if (activeAgent && data.length) {
+      for (let key in this.skillKey) {
+        if (key >= activeAgent.skills[index]) {
+          refLine = this.skillKey[key];
+          break;
+        }
+      }
+    }
+
     return (
       <div className="Trait-Chart-Container" key={index} >
         <AreaChart width={width} height={100} data={data}
               margin={{top: 20, right: 30, left: 20, bottom: 5}}>
          <Area dataKey="a" stackId="a" fill="#8884d8" />
-        <ReferenceLine x={100} stroke="red" />
+        <ReferenceLine x={refLine} stroke="red" />
         </AreaChart>
       </div>
     )
   }
 
   render() {
-    const { width, skills, product, numberOfAgents, numberOfTraits } = this.state;
+    const { activeAgent,  width, skills, product, numberOfAgents, numberOfTraits } = this.state;
     let pData = [];
+    let refLine = null;
+
+    if (activeAgent && product.length) {
+      for (let i = 0; i < product.length; i++) {
+        if (product[i] >= activeAgent.score) {
+          refLine = i;
+          break;
+        }
+      }
+    }
+
     const traits = [];
     if (skills[0] !== undefined) {
       pData = product.map(datum => {
@@ -218,7 +243,7 @@ class Page extends Component {
 
             <AreaChart width={width} height={300} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
-             <ReferenceLine x={50} stroke="red" />
+             <ReferenceLine x={refLine} stroke="red" />
              <Tooltip />
              <Area dataKey="a" fill="#8884d8" />
             </AreaChart>
