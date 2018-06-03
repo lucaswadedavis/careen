@@ -105,3 +105,13 @@
 .Trait-Chart-Container {
   display: inline-block;
 }
+
+.EquationContainer {
+  font-size: 2em;
+  padding: 32px 0 20px 0;
+  text-align: center;
+}
+
+.MajorChartContainer {
+  display: inline-block;
+}

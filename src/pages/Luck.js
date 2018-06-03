@@ -3,7 +3,8 @@ import Slider from 'rc-slider';
 import Chance from 'chance';
 import gaussian from 'gaussian';
 import { Tooltip as RbTooltip, OverlayTrigger, Grid } from 'react-bootstrap';
-import {Area, AreaChart, Cell, PieChart, Pie, YAxis, CartesianGrid, ReferenceLine, Tooltip } from  'recharts';
+import {Area, AreaChart, Cell, Legend, PieChart, Pie, CartesianGrid, ReferenceLine, Tooltip } from  'recharts';
+import { interpolatePlasma } from 'd3';
 import ReactResizeDetector from 'react-resize-detector';
 import '../App.css';
 
@@ -35,7 +36,7 @@ class Page extends Component {
     product: [],
     skills: [],
     numberOfAgents: 100,
-    numberOfTraits: 5,
+    numberOfTraits: 3,
   }
 
   skillKey = {};
@@ -49,15 +50,12 @@ class Page extends Component {
   }
 
   generatePopulation(numberOfAgents=this.state.numberOfAgents, numberOfTraits=this.state.numberOfTraits) {
-    const mean = 100;
-    const variance = 250;
+    const mean = 10;
+    const variance = 5;
     const skills = []; 
     const agents = [];
     let product = []; 
-    // repace this with the trick from bells
     const d = gaussian(mean, variance);
-    // get a random element from that distribution
-    // const sample = distribution.pdf(Math.random());
     const steps = 100;
     const increment = 0.02 * mean;
     let skill;
@@ -75,6 +73,8 @@ class Page extends Component {
     // this assigns trait values to agents
     // and figures out the product
     let sample;
+    let minScore = Infinity;
+    let sumScore = 0;
     for (let i = 0; i < numberOfAgents; i++) {
       let prod = 1;
       let trait = null;
@@ -87,13 +87,23 @@ class Page extends Component {
         agent.skills.push(trait);
         prod *= trait;
       }
+      if (prod < minScore) minScore = prod;
+      sumScore += prod;
       agent.score = prod;
       agent.size = prod;
       agents.push(agent);
-      product.push(prod);
-      if (i > 500) debugger;
     }
+
+    // reset the score values to smaller basis
+    for (let i = 0; i < agents.length; i++) {
+      //agents[i].score = agents[i].score / minScore;
+      agents[i].score = agents[i].score / (sumScore / agents.length);
+      agents[i].size = agents[i].score;
+      product.push(agents[i].score);
+    }
+
     product.sort((a, b) => a - b); 
+    
     return {agents, skills, product}
   }
 
@@ -158,15 +168,29 @@ class Page extends Component {
   }
 
   renderAgentsContainer() {
-    const { agents } = this.state;
+    const { agents, numberOfAgents } = this.state;
+    let max = -Infinity;
+    let min = Infinity;
+    for (let i = 0;  i < agents.length; i++) {
+      if (agents[i].score > max) max = agents[i].score;
+      if (agents[i].score < min) min = agents[i].score;
+    } 
+
     return (
       <div className="Agents-Container">
-        <h3>Agents</h3>
+        <h3>Agents ({ numberOfAgents })</h3>
+        <Slider min={10} max={200} value={numberOfAgents} onChange={val => this.updateNumberOfAgents(val)} />
         { 
           agents.map((agent, i) => {
+            const style = {backgroundColor: interpolatePlasma((agent.score ) / max)};
             return (
-              <OverlayTrigger key={i} placement="top" onMouseOver={() => this.setState({activeAgent: agent})} overlay={tooltip(agent)}>
-                <span className="Agent-Cell"></span>
+              <OverlayTrigger
+                key={i}
+                placement="top"
+                onMouseOver={() => this.setState({activeAgent: agent})}
+                onMouseOut={() => this.setState({activeAgent: null})}
+                overlay={tooltip(agent)}>
+                <span className="Agent-Cell" style={ style }></span>
               </OverlayTrigger>
             );
           })
@@ -190,17 +214,30 @@ class Page extends Component {
 
     return (
       <div className="Trait-Chart-Container" key={index} >
-        <AreaChart width={width} height={100} data={data}
+        <AreaChart width={width} height={40} data={data}
               margin={{top: 20, right: 30, left: 20, bottom: 5}}>
-         <Area dataKey="a" stackId="a" fill="#8884d8" />
-        <ReferenceLine x={refLine} stroke="red" />
+         <Area dataKey="a" stackId="a" fill="#222" />
+        <ReferenceLine x={refLine} stroke="gold" />
         </AreaChart>
       </div>
     )
   }
 
+  renderEquationContainer() {
+    const { numberOfTraits } = this.state;
+    const traitLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let rightHand = traitLetters.split('').slice(0, numberOfTraits).join(' x ');
+
+    return (
+      <div className="EquationContainer">
+        { rightHand } = Total Score
+      </div>
+    )
+
+  }
+
   render() {
-    const { activeAgent,  width, skills, product, numberOfAgents, numberOfTraits } = this.state;
+    const { agents, activeAgent,  width, skills, product, numberOfTraits } = this.state;
     let pData = [];
     let refLine = null;
 
@@ -227,28 +264,60 @@ class Page extends Component {
 
     }
 
+    let a2 = agents.slice().sort((a, b) => b.score - a.score);
+    let interval = a2.length / 10;
+    let index;
+    const deciles = [];
+    for (let i = 0; i < a2.length; i++) {
+      index = i / interval | 0;
+      if (deciles[index]) {
+        deciles[index].value += a2[i].score;
+      } else {
+        deciles[index] = {name: 'decile ' + ( 1 + index ), value: a2[i].score};
+      }
+    }
+
     return (
       <div>
         <Grid>
           <h2>Luck</h2>
-          <p>Created with d3</p>
           <div ref={this.saveRef}>
             <ReactResizeDetector handleWidth refreshMode="throttle" refreshRate={3000} onResize={() => this.measure()} />
-            <h3>number of agents ({ numberOfAgents })</h3>
-            <Slider min={10} max={200} value={numberOfAgents} onChange={val => this.updateNumberOfAgents(val)} />
-            <h3>number of traits ({ numberOfTraits })</h3>
-            <Slider min={1} max={10} value={numberOfTraits} onChange={val => this.updateNumberOfTraits(val)} />
-
             { this.renderAgentsContainer() } 
 
-            <AreaChart width={width} height={300} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
-             <CartesianGrid strokeDasharray="3 3"/>
-             <ReferenceLine x={refLine} stroke="red" />
-             <Tooltip />
-             <Area dataKey="a" fill="#8884d8" />
-            </AreaChart>
+            <h3>Traits ({ numberOfTraits })</h3>
+            <Slider min={1} max={20} value={numberOfTraits} onChange={val => this.updateNumberOfTraits(val)} />
+            { traits.map((trait, i) => this.renderTraitChart(width / numberOfTraits, trait, i)) } 
+            { this.renderEquationContainer() }
 
-            { traits.map((trait, i) => this.renderTraitChart(width / numberOfTraits, trait, i)) }            
+            <div className="MajorChartContainer">
+            <AreaChart width={width - 280} height={200} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+             <CartesianGrid strokeDasharray="3 3"/>
+             <Area dataKey="a" fill="#222" />
+             <ReferenceLine x={refLine} stroke="gold" />
+             <Tooltip />
+            </AreaChart>
+            </div>
+
+            <div className="MajorChartContainer">
+            <PieChart width={280} height={200}>
+              <Pie 
+                isAnimationActive={false}
+                data={deciles}
+                dataKey="value"
+                nameKey="name"
+                cx={80}
+                cy={100}
+                innerRadius={60}
+                outerRadius={80}
+              >
+              	{
+                  deciles.map((entry, index) => <Cell key={index} fill={interpolatePlasma(entry.value / deciles[0].value)}/>)
+                }
+              </Pie>
+              <Legend align="right" layout="vertical" />
+            </PieChart> 
+            </div>
           </div>
         </Grid>
       </div>
