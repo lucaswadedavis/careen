@@ -4,7 +4,7 @@ import Chance from 'chance';
 import gaussian from 'gaussian';
 import { Tooltip as RbTooltip, OverlayTrigger, Grid } from 'react-bootstrap';
 import {Area, AreaChart, Cell, Legend, PieChart, Pie, CartesianGrid, ReferenceLine, Tooltip } from  'recharts';
-import { interpolatePlasma } from 'd3';
+import {interpolateRdPu as colorInterpolate } from 'd3';
 import ReactResizeDetector from 'react-resize-detector';
 import '../App.css';
 
@@ -35,7 +35,7 @@ class Page extends Component {
     activeAgent: null,
     product: [],
     skills: [],
-    numberOfAgents: 100,
+    numberOfAgents: 200,
     numberOfTraits: 3,
   }
 
@@ -179,10 +179,10 @@ class Page extends Component {
     return (
       <div className="Agents-Container">
         <h3>Agents ({ numberOfAgents })</h3>
-        <Slider min={10} max={200} value={numberOfAgents} onChange={val => this.updateNumberOfAgents(val)} />
+        <Slider min={10} max={500} value={numberOfAgents} onChange={val => this.updateNumberOfAgents(val)} />
         { 
           agents.map((agent, i) => {
-            const style = {backgroundColor: interpolatePlasma((agent.score ) / max)};
+            const style = {backgroundColor: colorInterpolate((agent.score ) / max)};
             return (
               <OverlayTrigger
                 key={i}
@@ -215,9 +215,9 @@ class Page extends Component {
     return (
       <div className="Trait-Chart-Container" key={index} >
         <AreaChart width={width} height={40} data={data}
-              margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+              margin={{top: 20, right: 2, left: 2, bottom: 5}}>
          <Area dataKey="a" stackId="a" fill="#222" />
-        <ReferenceLine x={refLine} stroke="gold" />
+        <ReferenceLine x={refLine} stroke="#3BB9FF" />
         </AreaChart>
       </div>
     )
@@ -238,7 +238,6 @@ class Page extends Component {
 
   render() {
     const { agents, activeAgent,  width, skills, product, numberOfTraits } = this.state;
-    let pData = [];
     let refLine = null;
 
     if (activeAgent && product.length) {
@@ -252,10 +251,6 @@ class Page extends Component {
 
     const traits = [];
     if (skills[0] !== undefined) {
-      pData = product.map(datum => {
-        return {a: datum};
-      });
-    
       for (let i = 0; i < skills.length; i++) {
         traits.push(skills[i].map(n => {
           return {a: n};
@@ -264,6 +259,7 @@ class Page extends Component {
 
     }
 
+    let a1 = agents.slice().sort((a, b) => b.score - a.score).reverse();
     let a2 = agents.slice().sort((a, b) => b.score - a.score);
     let interval = a2.length / 10;
     let index;
@@ -291,10 +287,10 @@ class Page extends Component {
             { this.renderEquationContainer() }
 
             <div className="MajorChartContainer">
-            <AreaChart width={width - 280} height={200} data={pData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
+            <AreaChart width={width - 280} height={200} data={a1} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
-             <Area dataKey="a" fill="#222" />
-             <ReferenceLine x={refLine} stroke="gold" />
+             <Area dataKey="score" name="multiple of average" fill="#222" />
+             <ReferenceLine x={refLine} stroke="#3BB9FF" />
              <Tooltip />
             </AreaChart>
             </div>
@@ -302,7 +298,6 @@ class Page extends Component {
             <div className="MajorChartContainer">
             <PieChart width={280} height={200}>
               <Pie 
-                isAnimationActive={false}
                 data={deciles}
                 dataKey="value"
                 nameKey="name"
@@ -312,7 +307,7 @@ class Page extends Component {
                 outerRadius={80}
               >
               	{
-                  deciles.map((entry, index) => <Cell key={index} fill={interpolatePlasma(entry.value / deciles[0].value)}/>)
+                  deciles.map((entry, index) => <Cell key={index} fill={colorInterpolate(entry.value / deciles[0].value)}/>)
                 }
               </Pie>
               <Legend align="right" layout="vertical" />
