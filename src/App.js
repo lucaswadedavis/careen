@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Dash from './pages/Dash';
 import Bells from './pages/Bells';
 import Luck from './pages/Luck';
+import Playwright from './pages/Playwright';
 import Routing from './pages/Routing';
 import Affordances from './pages/Affordances';
 import FormElements from './pages/FormElements';
@@ -39,6 +40,7 @@ class App extends Component {
           <Route path="/dash" component={Dash} />
           <Route path="/bells" component={Bells} />
           <Route path="/luck" component={Luck} />
+          <Route path="/playwright" component={Playwright} />
           <Route path="/affordances" component={Affordances} />
           <Route path="/form-elements" component={FormElements} />
           <Route path="/routing" component={Routing} />
