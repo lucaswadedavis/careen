@@ -25,7 +25,7 @@ class App extends Component {
           <Navbar.Collapse>
           <Nav>
             <LinkContainer to="/"><NavItem>Home</NavItem></LinkContainer>
-            <LinkContainer to="/dash"><NavItem>Dash</NavItem></LinkContainer>
+            <LinkContainer to="/luck"><NavItem>Luck</NavItem></LinkContainer>
             <LinkContainer to="/form-elements"><NavItem>Form Elements</NavItem></LinkContainer>
             <LinkContainer to="/affordances"><NavItem>Affordances</NavItem></LinkContainer>
             <LinkContainer to="/routing"><NavItem>Routing</NavItem></LinkContainer>

@@ -5,6 +5,9 @@ import ReactResizeDetector from 'react-resize-detector';
 import gaussian from 'gaussian';
 import '../App.css';
 
+const COLOR_1 = "red";
+const COLOR_2 = "yellow";
+
 const toPercent = (decimal, fixed = 0) => {
 	return `${(decimal * 100).toFixed(fixed)}%`;
 };
@@ -50,7 +53,7 @@ class Dash extends Component {
     //console.log(d[0].value, d[1].value);
     const a = Math.max(c * d[0].value, c * d[1].value);
     const b = Math.min(c * d[0].value, c * d[1].value);
-    const COLORS = ["#8884d8", "#82ca9d"];
+    const COLORS = [COLOR_1, COLOR_2];
     return ( 
         <div>
         <p>{Math.floor(100 * a / b) / 100} : 1</p>
@@ -127,21 +130,21 @@ class Dash extends Component {
             <AreaChart width={width} height={300} data={cData} margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
              <Tooltip content={ this.renderCustomTooltip } />
-             <Area dataKey="a" fill="#8884d8" />
-             <Area dataKey="b" fill="#82ca9d" />
+             <Area dataKey="a" fill={ COLOR_1 } />
+             <Area dataKey="b" fill={ COLOR_2 } />
             </AreaChart>
-            <h3>variance of purple: { variance1 } (standard deviation: { Math.sqrt(variance1).toFixed(2) })</h3>
+            <h3>variance of red: { variance1 } (standard deviation: { Math.sqrt(variance1).toFixed(2) })</h3>
             <Slider min={1} max={450} value={variance1} onChange={val => this.updateVariance1(val)} />
-            <h3>variance of green: { variance2 } (standard deviation: { Math.sqrt(variance2).toFixed(2) })</h3>
+            <h3>variance of yellow: { variance2 } (standard deviation: { Math.sqrt(variance2).toFixed(2) })</h3>
             <Slider min={1} max={450} value={variance2} onChange={val => this.updateVariance2(val)} />
-            <h3>ratio of purple to green: { 100 - ratio } / { ratio }</h3>
+            <h3>ratio of red to yellow: { 100 - ratio } / { ratio }</h3>
             <Slider min={0} max={100} value={ratio} onChange={val => this.updateRatio(val)} />
             <AreaChart stackOffset="expand" width={width} height={100} data={cData}
               margin={{top: 20, right: 30, left: 20, bottom: 5}}>
              <CartesianGrid strokeDasharray="3 3"/>
             <YAxis tickFormatter={toPercent}/>
-             <Area dataKey="a" fill="#8884d8" stackId="1" />
-             <Area dataKey="b" fill="#82ca9d" stackId="1" />
+             <Area dataKey="a" fill={ COLOR_1 } stackId="1" />
+             <Area dataKey="b" fill={ COLOR_2 } stackId="1" />
             </AreaChart>
           </div>
     )
