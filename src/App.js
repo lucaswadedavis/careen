@@ -5,6 +5,7 @@ import { LinkContainer } from 'react-router-bootstrap';
 import Home from './pages/Home';
 import Dash from './pages/Dash';
 import Bells from './pages/Bells';
+import Fermi from './pages/Fermi';
 import Luck from './pages/Luck';
 import Playwright from './pages/Playwright';
 import Routing from './pages/Routing';
@@ -27,6 +28,7 @@ class App extends Component {
           <Nav>
             <LinkContainer to="/"><NavItem>Home</NavItem></LinkContainer>
             <LinkContainer to="/luck"><NavItem>Luck</NavItem></LinkContainer>
+            <LinkContainer to="/fermi"><NavItem>Fermi</NavItem></LinkContainer>
             <LinkContainer to="/form-elements"><NavItem>Form Elements</NavItem></LinkContainer>
             <LinkContainer to="/affordances"><NavItem>Affordances</NavItem></LinkContainer>
             <LinkContainer to="/routing"><NavItem>Routing</NavItem></LinkContainer>
@@ -39,6 +41,7 @@ class App extends Component {
           <Route exact path="/" component={Home} />
           <Route path="/dash" component={Dash} />
           <Route path="/bells" component={Bells} />
+          <Route path="/fermi" component={Fermi} />
           <Route path="/luck" component={Luck} />
           <Route path="/playwright" component={Playwright} />
           <Route path="/affordances" component={Affordances} />
